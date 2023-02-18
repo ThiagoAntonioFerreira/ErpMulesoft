@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
-    <apikit:config name="american-flights-api-config" api="resource::fffa64b0-6e99-427f-9910-477f83d80b50:american-flights-api:1.0.3:raml:zip:american-flights-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <apikit:config name="american-flights-api-config" api="resource::fffa64b0-6e99-427f-9910-477f83d80b50:american-flights-api:1.0.4:raml:zip:american-flights-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="american-flights-api-main">
         <http:listener config-ref="HTTP_Listener_config" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -127,60 +127,36 @@ output application/json
         <logger level="INFO" message="delete:\flights:american-flights-api-config" />
     </flow>
     <flow name="get:\flights:american-flights-api-config">
-        <ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    ID: 1,
-    code: "ER38sd",
-    price: 400,
-    departureDate: "2017/07/26",
-    origin: "CLE",
-    destination: "SFO",
-    emptySeats: 0,
-    plane: {
-      "type": "Boeing 737",
-      totalSeats: 150
-    }
-  }, 
-  {
-    ID: 2,
-    code: "ER45if",
-    price: 540.99,
-    departureDate: "2017/07/27",
-    origin: "SFO",
-    destination: "ORD",
-    emptySeats: 54,
-    plane: {
-      "type": "Boeing 777",
-      totalSeats: 300
-    }
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="20545a2e-544b-4c86-a7cb-f372dabdd00e" message="passou aqui"/>
+        <flow-ref doc:name="Flow Reference" doc:id="5ac13dbb-847c-4f4d-8aac-de534592f882" name="GetAll" />
+        <logger level="INFO" doc:name="Logger" doc:id="20545a2e-544b-4c86-a7cb-f372dabdd00e" message="passou aqui" />
     </flow>
     <flow name="get:\flights\(ID):american-flights-api-config">
         <ee:transform doc:id="751d50ab-f728-42c1-8945-93ef2c40158a">
-            <ee:message >
-				<ee:set-payload ><![CDATA[output application/json
+            <ee:message>
+                <ee:set-payload><![CDATA[output application/json
 ---
 
 {
 	id: "1"
-}
-]]></ee:set-payload>
-			</ee:message>
-			<ee:variables>
-            </ee:variables>
+}]]></ee:set-payload>
+            </ee:message>
+            <ee:variables />
         </ee:transform>
         <logger level="INFO" message="get:\flights\(ID):american-flights-api-config" />
     </flow>
     <flow name="post:\flights:application\json:american-flights-api-config">
         <logger level="INFO" message="post:\flights:application\json:american-flights-api-config" />
+    </flow>
+    <flow name="put:\flights:application\json:american-flights-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Flight updated (but not really)"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
     </flow>
 </mule>
