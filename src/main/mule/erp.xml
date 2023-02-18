@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ed68dc5b-e2eb-42c9-99ca-a9796b685277" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="77a8e4d6-3aa8-4e5c-af3e-b16ce74f6bb3" >
+		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
+	</db:config>
 	<flow name="erpFlow" doc:id="096bfa0f-1b26-48f4-a475-46b24f05017f" >
 		<http:listener doc:name="Listener" doc:id="3d720cfa-d8a9-4c20-91bc-12cb7ce549f5" config-ref="HTTP_Listener_config" path="/Erp"/>
-<!-- [STUDIO:"Set Payload"]  		<set-payload value="Flight info" doc:name="Set Payload" doc:id="f760535f-be4e-4661-aed1-dd91080059ed" /> [STUDIO] -->
+  		<set-payload value="Projeto ERP" doc:name="Set Payload" doc:id="f760535f-be4e-4661-aed1-dd91080059ed" />
+		<db:select doc:name="Select" doc:id="69904a08-51ac-47dc-8a78-0412f036a03e" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM american]]></db:sql>
+		</db:select>
 	</flow>
 </mule>
