@@ -1,21 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ed68dc5b-e2eb-42c9-99ca-a9796b685277" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="77a8e4d6-3aa8-4e5c-af3e-b16ce74f6bb3" >
 		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
 	</db:config>
-	<flow name="erpFlow" doc:id="096bfa0f-1b26-48f4-a475-46b24f05017f" >
-		<http:listener doc:name="Listener" doc:id="3d720cfa-d8a9-4c20-91bc-12cb7ce549f5" config-ref="HTTP_Listener_config" path="/Erp"/>
+	<flow name="GetAll" doc:id="096bfa0f-1b26-48f4-a475-46b24f05017f" >
+		<http:listener doc:name="Listener" doc:id="3d720cfa-d8a9-4c20-91bc-12cb7ce549f5" config-ref="HTTP_Listener_config" path="/Erp" allowedMethods="GET"/>
   		<set-payload value="Projeto ERP" doc:name="Set Payload" doc:id="f760535f-be4e-4661-aed1-dd91080059ed" />
-		<db:select doc:name="Select" doc:id="69904a08-51ac-47dc-8a78-0412f036a03e" config-ref="Database_Config">
+		<db:select doc:name="Busca dados na tabela" doc:id="69904a08-51ac-47dc-8a78-0412f036a03e" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT * FROM american]]></db:sql>
 		</db:select>
+		<ee:transform doc:name="Trata Dados" doc:id="80e7125f-1726-477a-8644-851142995277" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import toString from dw::util::Coercions
+output application/json
+
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: upper ( (payload01.code1 default "") ++ (payload01.code2 default "") ),
+	price: (payload01.price default 0) + (payload01.price default 0),
+	departureDate: payload01.takeOffDate as String default "",
+	origin: upper ( (payload01.fromAirport default "") ++ (payload01.fromAirport default "") ),
+	destination: (payload01.toAirport default "") ++ (payload01.toAirport default ""),
+	emptySeats: payload01.seatsAvailable default 0,
+	dataPortugues: toString ( toString ( payload01.takeOffDate as String default "" ) , "dd/MM/uuuu" , "PT" ),
+	plane: {
+		"type": payload01.planeType default "",
+		totalSeats: payload01.totalSeats default 0
+	}
+} ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="GetById" doc:id="07d380b0-3343-44fb-9dd6-a2b5b19a6897" >
+		<http:listener doc:name="Listener" doc:id="1775fbc8-3765-446e-a40d-bb5e060557bf" config-ref="HTTP_Listener_config" path="/Erp/{ID}" allowedMethods="GET" />
+		<set-payload value="Projeto ERP" doc:name="Set Payload" doc:id="b6487feb-0219-4440-a2a7-1a92622e2b3d" />
+		<db:select doc:name="Busca dados na tabela" doc:id="1bf5987d-cc0f-40ec-baf3-0aeff2bc83b6" config-ref="Database_Config" >
+			<db:sql ><![CDATA[SELECT * FROM american where ID = :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'ID': attributes.uriParams.ID}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Trata Dados" doc:id="ef435a40-3364-4049-8ff4-682d173171c2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import toString from dw::util::Coercions
+output application/json
+
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: upper ( (payload01.code1 default "") ++ (payload01.code2 default "") ),
+	price: (payload01.price default 0) + (payload01.price default 0),
+	departureDate: payload01.takeOffDate as String default "",
+	origin: upper ( (payload01.fromAirport default "") ++ (payload01.fromAirport default "") ),
+	destination: (payload01.toAirport default "") ++ (payload01.toAirport default ""),
+	emptySeats: payload01.seatsAvailable default 0,
+	dataPortugues: toString ( toString ( payload01.takeOffDate as String default "" ) , "dd/MM/uuuu" , "PT" ),
+	plane: {
+		"type": payload01.planeType default "",
+		totalSeats: payload01.totalSeats default 0
+	}
+} ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="Post" doc:id="e489c04d-6589-40e8-9771-e01cff5fdda3" >
+		<http:listener doc:name="Listener" doc:id="50c24d27-d881-4acc-b115-bacea8f75b4c" config-ref="HTTP_Listener_config" path="/Erp" allowedMethods="POST" />
+		<set-payload value='{"message": "Adicionado com sucesso", "success" : true}' doc:name="Set Payload" doc:id="242fedab-b840-4e92-b0dd-7bf1bfa73227" />
 	</flow>
 </mule>
