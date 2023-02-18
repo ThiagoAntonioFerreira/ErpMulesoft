@@ -18,4 +18,5 @@ type american_flights_json = Array<{|  ID: Number {"typeId": "int"},   code: Str
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#751d50ab-f728-42c1-8945-93ef2c40158a"/>
 </types:mule>
